@@ -113,12 +113,12 @@ void table_gpio_quote_remove(pin_table_t *table, int field_point, int pin_table_
 	quote_point = NULL;
 	quote_point = strchr(table->line[pin_table_line].column[field_point].field, '"');
 	if (quote_point != NULL) {
-		strcpy(&quote_point[0], &quote_point[1]);
+		memmove(&quote_point[0], &quote_point[1], strlen(&quote_point[1]) + 1);
 	}
 	quote_point = NULL;
 	quote_point = strchr(table->line[pin_table_line].column[field_point].field, '"');
 	if (quote_point != NULL) {
-		strcpy(&quote_point[0], &quote_point[1]);
+	    memmove(&quote_point[0], &quote_point[1], strlen(&quote_point[1]) + 1);
 	}
 }
 
@@ -157,8 +157,7 @@ void table_gpio_name_handler(pin_table_t *table) {
 	if(name_numeral.size) {
 		//заполнение префикса пина
 		//GPIO_PIN_COLUMN_PREFIX
-		strncat(table->line[table->lines_counter].column[GPIO_PIN_COLUMN].field, GPIO_PIN_COLUMN_PREFIX,
-				GPIO_PIN_COLUMN_PREFIX_SIZE);
+		strcat(table->line[table->lines_counter].column[GPIO_PIN_COLUMN].field, GPIO_PIN_COLUMN_PREFIX);
 		//копирование номера пина
 		strncat(table->line[table->lines_counter].column[GPIO_PIN_COLUMN].field,
 				&table->line[table->lines_counter].column[table->header.name].field[name_numeral.shift], name_numeral.size);
@@ -214,7 +213,7 @@ void table_gpio_af_handler(pin_table_t *table) {
 		sprintf(table->line[table->lines_counter].column[GPIO_OSPEED_COLUMN].field, "%s", GPIO_OSPEED_DEFAULT);
 		sprintf(table->line[table->lines_counter].column[GPIO_PUPD_COLUMN].field, "%s", GPIO_PUPD_DEFAULT);
 		//заполнение поля альтернативной функции
-		sprintf(table->line[table->lines_counter].column[GPIO_AF_COLUMN].field, "%s%i", GPIO_AF_COLUMN_PREFIX,
+		sprintf(table->line[table->lines_counter].column[GPIO_AF_COLUMN].field, "%s%lu", GPIO_AF_COLUMN_PREFIX,
 				pin_alt_func - table->header.af0);
 	}
 
@@ -323,8 +322,8 @@ void table_handler(pin_table_t *table, char *conf_name) {
 			printf("Label bot found!\n");
 		if (table->header.af0 == PIN_TABLE_COLUMN_MAX_SIZE)
 			printf("AF0 not found!\n");
-		printf("Columns: %i\n", pin_table.columns_count);
-		printf("Lines: %i\n", pin_table.lines_count);
+		printf("Columns: %lu\n", pin_table.columns_count);
+		printf("Lines: %lu\n", pin_table.lines_count);
 		return;
 	}
 
@@ -335,9 +334,9 @@ void table_handler(pin_table_t *table, char *conf_name) {
 
 	//начало массива
 	if(conf_name == NULL) {
-		printf("static const gpio_pin_cfg_t gpio_init[%i] = {\n", table->gpio_count);
+		printf("static const gpio_pin_cfg_t gpio_init[%lu] = {\n", table->gpio_count);
 	} else {
-		printf("static const gpio_pin_cfg_t %s[%i] = {\n", conf_name ,table->gpio_count);
+		printf("static const gpio_pin_cfg_t %s[%lu] = {\n", conf_name ,table->gpio_count);
 	}
 	//обход массива пинов
 	for (table->lines_counter = TABLE_START_POINT; table->lines_counter < table->lines_count; table->lines_counter++) {
